@@ -1,10 +1,10 @@
 const Pool = require('pg').Pool
 const md5 = require('md5')
 const pool = new Pool({
-    user: 'dexster',
+    user: 'postgres',
     host: 'localhost',
     database: 'opsonic',
-    password: '1234567890',
+    password: 'password',
     port: '5432'
 })
 
@@ -70,7 +70,7 @@ const login = (request, response) => {
                 let user = result.rows[0]
                 //console.log(user.id)
                 //console.log(result.rows)
-                let query = "INSERT INTO SESSIONS(USER_ID,CREATED_BY,UPDATED_BY) VALUES ($1,$2,$3)RETURNING SSID;"
+                let query = "INSERT INTO SESSIONS(USER_ID,CREATED_BY,UPDATED_BY) VALUES ($1,$2INSERT INTO ARTICLES(NAME,TYPE,LINK,CREATED_BY,UPDATED_BY)VALUES($1,$2,$3)RETURNING SSID;"
                 pool.query(query, [user.id, 0, 0], (error, result) => {
                     if (error)
                         throw error
@@ -187,6 +187,68 @@ const logout = (request,response)=>{
     })
 }
 
+
+const storeArticleWithChecks = (request,response) => {
+    let user_id = request.userId 
+
+    let payload = request.body
+    let name = payload.name
+    let checks = payload.checks
+    let type = payload.type
+    let link = payload.link
+    let query = "INSERT INTO ARTICLES(NAME,TYPE,LINK,CREATED_BY,UPDATED_BY)VALUES($1,$2,$3,$4,$5)RETURNING ID;"
+    pool.query("BEGIN")
+    .then(result => {
+        pool.query(query, [name,type,link,user_id,user_id])
+        .then(result => {
+            let article_id = result.rows[0].id
+            var i;
+            for(i = 0; i < checks.length; i++) {
+                
+                let data = {
+                    "article_id" : article_id,
+                    "user_id" : user_id,
+                    "check" : checks[i]
+                }
+                storeChecks(request,response,data);
+            }
+        })
+        .then(result=>{
+            pool.query("COMMIT")
+            response.status(200).send({"status":"success"})
+        })
+        .catch(error=>{
+            console.log(error)
+            pool.query("ROLLBACK")
+            response.status(200).send({"status":"failed"})
+        })        
+    })
+}
+
+const storeChecks = (request,response,req) => {
+
+    console.log("here")
+    
+    let data = req.check
+    console.log(data)
+
+    let article_id = req.article_id
+    let user_id = req.user_id
+    let check_name = data.check_name
+    let check_description = data.check_description
+    let expected_evidences = data.expected_evidences
+
+    let query = "INSERT INTO CHECKS(belongs_to_article,check_name,check_description,expected_evidences,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6)"
+    pool.query(query, [article_id,check_name,check_description,expected_evidences,user_id,user_id])
+    .then(result=>{
+
+     } )
+     .catch(err=>{
+         console.log(err)
+     })
+
+}
+
 module.exports = {
     getTickets,
     getUsers,
@@ -195,5 +257,7 @@ module.exports = {
     validateUser,
     getArticles,
     getChecksByArticle,
+    storeArticleWithChecks,
+    storeChecks,
     logout
 }

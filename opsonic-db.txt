@@ -1,0 +1,561 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 12.4 (Ubuntu 12.4-1.pgdg20.04+1)
+-- Dumped by pg_dump version 12.4 (Ubuntu 12.4-0ubuntu0.20.04.1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: article_type; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.article_type (
+    id integer NOT NULL,
+    name text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by text,
+    updated_by text,
+    deleted text DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: article_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.article_type_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: article_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.article_type_id_seq OWNED BY public.article_type.id;
+
+
+--
+-- Name: articles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.articles (
+    id integer NOT NULL,
+    name text,
+    type text,
+    link text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_by integer,
+    deleted text DEFAULT 0
+);
+
+
+--
+-- Name: articles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.articles_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: articles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.articles_id_seq OWNED BY public.articles.id;
+
+
+--
+-- Name: checks; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.checks (
+    id integer NOT NULL,
+    belongs_to_article integer,
+    check_name text,
+    check_description text,
+    expected_evidences text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_by integer,
+    deleted text DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: checks_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.checks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: checks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.checks_id_seq OWNED BY public.checks.id;
+
+
+--
+-- Name: roles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.roles (
+    id integer NOT NULL,
+    name text,
+    priority text,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer DEFAULT 0 NOT NULL,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_by integer DEFAULT 0 NOT NULL,
+    deleted text DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.roles_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
+
+
+--
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sessions (
+    id bigint NOT NULL,
+    user_id integer,
+    ssid text DEFAULT public.gen_random_uuid() NOT NULL,
+    expires_at timestamp with time zone DEFAULT (CURRENT_TIMESTAMP + ((15)::double precision * '00:01:00'::interval)),
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer,
+    updated_by integer,
+    deleted integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sessions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.sessions_id_seq OWNED BY public.sessions.id;
+
+
+--
+-- Name: tickets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tickets (
+    id integer NOT NULL,
+    name text,
+    resolved text,
+    current_level text,
+    current_assigned_to integer,
+    sla_breached text,
+    customer_escalations integer,
+    customer_feedback text,
+    raised_by text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    created_by integer,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_by integer,
+    deleted text DEFAULT 0
+);
+
+
+--
+-- Name: tickets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.tickets_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tickets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.tickets_id_seq OWNED BY public.tickets.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    first_name text,
+    last_name text,
+    email text,
+    phone text,
+    email_verified text DEFAULT 0,
+    phone_verified text DEFAULT 0,
+    role integer,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by integer,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_by integer,
+    deleted text DEFAULT 0,
+    password text
+);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: article_type id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_type ALTER COLUMN id SET DEFAULT nextval('public.article_type_id_seq'::regclass);
+
+
+--
+-- Name: articles id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.articles ALTER COLUMN id SET DEFAULT nextval('public.articles_id_seq'::regclass);
+
+
+--
+-- Name: checks id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checks ALTER COLUMN id SET DEFAULT nextval('public.checks_id_seq'::regclass);
+
+
+--
+-- Name: roles id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_id_seq'::regclass);
+
+
+--
+-- Name: sessions id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions ALTER COLUMN id SET DEFAULT nextval('public.sessions_id_seq'::regclass);
+
+
+--
+-- Name: tickets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets ALTER COLUMN id SET DEFAULT nextval('public.tickets_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: article_type; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.article_type (id, name, created_at, updated_at, created_by, updated_by, deleted) FROM stdin;
+1	Knowledge Base	2021-03-23 10:36:42.402327+05:30	2021-03-23 10:36:42.402327+05:30	0	0	0
+2	Maintainance	2021-03-23 10:36:53.546144+05:30	2021-03-23 10:36:53.546144+05:30	0	0	0
+3	Plugins	2021-03-23 10:37:00.969563+05:30	2021-03-23 10:37:00.969563+05:30	0	0	0
+\.
+
+
+--
+-- Data for Name: articles; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.articles (id, name, type, link, created_at, created_by, updated_at, updated_by, deleted) FROM stdin;
+1	INVESTIGATE AN EPS SPIKE	1	https://docs.dnif.it/v81/docs/consider-role-based-access-control	2021-03-19 14:59:46.987916+05:30	0	2021-03-19 14:59:46.987916+05:30	0	0
+2	filtering with pico	1	https://docs.dnif.it/v81/docs/pico-1	2021-03-19 15:01:23.252507+05:30	0	2021-03-19 15:01:23.252507+05:30	0	0
+3	Article name	1	https://local/abcd	2021-03-23 17:26:57.184075+05:30	\N	2021-03-23 17:26:57.184075+05:30	\N	0
+4	Article name	1	https://local/abcd	2021-03-23 17:27:55.877035+05:30	\N	2021-03-23 17:27:55.877035+05:30	\N	0
+5	Article Test	2	https://dnif.it/abcd	2021-03-23 17:36:18.8918+05:30	\N	2021-03-23 17:36:18.8918+05:30	\N	0
+6	Article Test 2	2	https://dnif.it/abcd	2021-03-23 17:41:13.42691+05:30	\N	2021-03-23 17:41:13.42691+05:30	\N	0
+7	Article Test 2	2	https://dnif.it/abcd	2021-03-23 17:41:37.792574+05:30	\N	2021-03-23 17:41:37.792574+05:30	\N	0
+8	Article Test 2	2	https://dnif.it/abcd	2021-03-23 17:42:58.977469+05:30	\N	2021-03-23 17:42:58.977469+05:30	\N	0
+9	Article Test 2	2	https://dnif.it/abcd	2021-03-23 17:43:45.433336+05:30	\N	2021-03-23 17:43:45.433336+05:30	\N	0
+10	Article Test 2	2	https://dnif.it/abcd	2021-03-23 17:44:14.588609+05:30	\N	2021-03-23 17:44:14.588609+05:30	\N	0
+\.
+
+
+--
+-- Data for Name: checks; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.checks (id, belongs_to_article, check_name, check_description, expected_evidences, created_at, created_by, updated_at, updated_by, deleted) FROM stdin;
+1	1	CHECK 1	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:56:02.721001+05:30	0	2021-04-05 13:56:02.721001+05:30	0	0
+2	2	CHECK 1	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:56:22.719804+05:30	0	2021-04-05 13:56:22.719804+05:30	0	0
+3	3	CHECK 1	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:56:29.003818+05:30	0	2021-04-05 13:56:29.003818+05:30	0	0
+4	1	CHECK 2	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:03.337915+05:30	0	2021-04-05 13:57:03.337915+05:30	0	0
+5	1	CHECK 3	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:09.10349+05:30	0	2021-04-05 13:57:09.10349+05:30	0	0
+6	2	CHECK 2	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:20.176193+05:30	0	2021-04-05 13:57:20.176193+05:30	0	0
+7	3	CHECK 2	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:26.958512+05:30	0	2021-04-05 13:57:26.958512+05:30	0	0
+8	2	CHECK 3	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:38.480693+05:30	0	2021-04-05 13:57:38.480693+05:30	0	0
+9	3	CHECK 3	THIS IS CHECK DESCRIPTION	EVIDENCE1,EVIDENCE2,EVIDENCE3	2021-04-05 13:57:46.698992+05:30	0	2021-04-05 13:57:46.698992+05:30	0	0
+\.
+
+
+--
+-- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.roles (id, name, priority, created_at, created_by, updated_at, updated_by, deleted) FROM stdin;
+1	OPERATION-ENGINEER	1	2021-04-04 16:48:05.303845	0	2021-04-04 16:48:05.303845	0	0
+\.
+
+
+--
+-- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.sessions (id, user_id, ssid, expires_at, created_at, updated_at, created_by, updated_by, deleted) FROM stdin;
+83	2	4df29bea-81f5-4545-861b-3fb81a398dc0	2021-04-04 20:26:57.884402+05:30	2021-04-04 20:11:57.884402+05:30	2021-04-04 20:11:57.884402+05:30	0	0	0
+86	2	84791947-2be7-4579-a660-8a090f6cff65	2021-04-05 13:25:13.047265+05:30	2021-04-05 13:10:13.047265+05:30	2021-04-05 13:10:13.047265+05:30	0	0	0
+87	2	9142830b-2e28-4a94-b396-32f8ea121702	2021-04-05 13:26:13.903754+05:30	2021-04-05 13:11:13.903754+05:30	2021-04-05 13:11:13.903754+05:30	0	0	0
+91	2	5c9ef6f3-9bd9-4c2c-8bf2-5042cb9f2483	2021-04-06 11:36:49.855161+05:30	2021-04-06 11:21:49.855161+05:30	2021-04-06 11:21:49.855161+05:30	0	0	0
+92	2	a40b6707-ca2d-4542-beb8-de35eca6f3d2	2021-04-06 11:37:20.982715+05:30	2021-04-06 11:22:20.982715+05:30	2021-04-06 11:22:20.982715+05:30	0	0	0
+93	2	d3c38077-0656-40d8-ae83-ac4e13c984a6	2021-04-07 10:30:32.921172+05:30	2021-04-07 10:15:32.921172+05:30	2021-04-07 10:15:32.921172+05:30	0	0	0
+94	2	1233a793-67ae-418c-9d13-fe2ce9c40041	2021-04-08 01:38:40.613424+05:30	2021-04-08 01:23:40.613424+05:30	2021-04-08 01:23:40.613424+05:30	0	0	0
+95	2	15a7d000-718c-426c-8aa2-0332c92841c5	2021-04-08 01:52:22.151526+05:30	2021-04-08 01:37:22.151526+05:30	2021-04-08 01:37:22.151526+05:30	0	0	0
+96	2	1ca44466-7a9f-4ed7-a327-6a3610f22090	2021-04-08 01:52:23.576831+05:30	2021-04-08 01:37:23.576831+05:30	2021-04-08 01:37:23.576831+05:30	0	0	0
+97	2	7df0d572-07cd-403d-8afc-eea5b1e477cf	2021-04-08 01:52:32.871477+05:30	2021-04-08 01:37:32.871477+05:30	2021-04-08 01:37:32.871477+05:30	0	0	0
+98	2	dcd3ffdd-f4c2-4775-ad9e-d5a784bd8a40	2021-04-08 02:00:23.40039+05:30	2021-04-08 01:45:23.40039+05:30	2021-04-08 01:45:23.40039+05:30	0	0	0
+99	2	c4ccffed-9267-4fc2-8a17-e65d1d152293	2021-04-08 02:00:25.55431+05:30	2021-04-08 01:45:25.55431+05:30	2021-04-08 01:45:25.55431+05:30	0	0	0
+100	2	ddafab2a-c440-4926-bfb1-065ac32423b8	2021-04-08 02:05:10.483509+05:30	2021-04-08 01:50:10.483509+05:30	2021-04-08 01:50:10.483509+05:30	0	0	0
+101	2	84a553bd-27fa-441f-89cd-e35540351e15	2021-04-08 02:05:19.131601+05:30	2021-04-08 01:50:19.131601+05:30	2021-04-08 01:50:19.131601+05:30	0	0	0
+102	2	728b9bdb-f3e0-4f4f-ba6e-239a0a034f85	2021-04-08 10:20:37.644951+05:30	2021-04-08 10:05:37.644951+05:30	2021-04-08 10:05:37.644951+05:30	0	0	0
+103	2	64a0cb61-92c6-4fbd-a7d6-95f5b3d1d4d0	2021-04-08 10:32:13.913341+05:30	2021-04-08 10:17:13.913341+05:30	2021-04-08 10:17:13.913341+05:30	0	0	0
+104	2	33619281-4107-4872-bc66-aa28867b328f	2021-04-08 10:33:08.649953+05:30	2021-04-08 10:18:08.649953+05:30	2021-04-08 10:18:08.649953+05:30	0	0	0
+105	2	bfb396e8-a8ab-4fd5-8cdd-377338d7da8a	2021-04-08 13:22:59.362116+05:30	2021-04-08 13:07:59.362116+05:30	2021-04-08 13:07:59.362116+05:30	0	0	0
+106	2	d5686b18-05ab-4088-a6a3-b290fa33c3c4	2021-04-08 13:23:00.698457+05:30	2021-04-08 13:08:00.698457+05:30	2021-04-08 13:08:00.698457+05:30	0	0	0
+\.
+
+
+--
+-- Data for Name: tickets; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.tickets (id, name, resolved, current_level, current_assigned_to, sla_breached, customer_escalations, customer_feedback, raised_by, created_at, created_by, updated_at, updated_by, deleted) FROM stdin;
+1	PICO ISSUE	0	1	2	0	0		ashu@tcs.com	2021-03-19 15:22:58.656046+05:30	1	2021-03-19 15:22:58.656046+05:30	1	0
+2	RBAC ISSUE	0	1	2	0	0		tarun@tcs.com	2021-03-19 15:23:56.076296+05:30	1	2021-03-19 15:23:56.076296+05:30	1	0
+3	UEBA DIAGNOSTICS	0	\N	3	0	0		support@mm.com	2021-04-05 09:05:05.552224+05:30	0	2021-04-05 09:05:05.552224+05:30	0	0
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.users (id, first_name, last_name, email, phone, email_verified, phone_verified, role, created_at, created_by, updated_at, updated_by, deleted, password) FROM stdin;
+2	GAURAV	MAKHIJA	gaurav.makhija@dnif.it	8329336608	0	0	1	2021-03-30 16:03:19.911257+05:30	0	2021-03-30 16:03:19.911257+05:30	0	0	c830886493355092c85a7b855069decc
+\.
+
+
+--
+-- Name: article_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.article_type_id_seq', 3, true);
+
+
+--
+-- Name: articles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.articles_id_seq', 10, true);
+
+
+--
+-- Name: checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.checks_id_seq', 9, true);
+
+
+--
+-- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.roles_id_seq', 1, true);
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.sessions_id_seq', 106, true);
+
+
+--
+-- Name: tickets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.tickets_id_seq', 3, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 2, true);
+
+
+--
+-- Name: article_type article_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.article_type
+    ADD CONSTRAINT article_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: articles articles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.articles
+    ADD CONSTRAINT articles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: checks checks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checks
+    ADD CONSTRAINT checks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roles
+    ADD CONSTRAINT roles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tickets tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets
+    ADD CONSTRAINT tickets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- PostgreSQL database dump complete
+--

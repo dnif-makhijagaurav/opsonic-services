@@ -39,6 +39,7 @@ app.get('/users',DB.getUsers)
 app.get('/articles',DB.getArticles)
 app.post('/article/add',DB.addNewArticle)
 app.post('/checks',DB.getChecksByArticle)
+app.post('/articles',DB.storeArticleWithChecks)
 
 app.listen(port,()=>{
     console.log("Server started on port "+port)
